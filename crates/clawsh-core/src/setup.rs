@@ -18,29 +18,7 @@ async fn ollama_running() -> bool {
 async fn install_ollama() -> anyhow::Result<()> {
     println!("📦 Installing Ollama...");
 
-    #[cfg(target_os = "macos")]
-    {
-        // Check if brew is available
-        let brew = std::process::Command::new("which").arg("brew").output();
-        if brew.map(|o| o.status.success()).unwrap_or(false) {
-            let status = std::process::Command::new("brew")
-                .args(["install", "ollama"])
-                .status()?;
-            if !status.success() {
-                anyhow::bail!("brew install ollama failed");
-            }
-        } else {
-            // Fallback: official install script
-            let status = std::process::Command::new("sh")
-                .args(["-c", "curl -fsSL https://ollama.com/install.sh | sh"])
-                .status()?;
-            if !status.success() {
-                anyhow::bail!("Ollama install script failed");
-            }
-        }
-    }
-
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "macos", target_os = "linux"))]
     {
         let status = std::process::Command::new("sh")
             .args(["-c", "curl -fsSL https://ollama.com/install.sh | sh"])
