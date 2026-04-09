@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Config {
     #[serde(default)]
     pub models: ModelsConfig,
@@ -48,17 +48,6 @@ fn default_classifier() -> String { "smollm2:135m".to_string() }
 fn default_true() -> bool { true }
 fn default_history_size() -> usize { 10000 }
 fn default_prompt() -> String { "{model} {cwd} ❯".to_string() }
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            models: ModelsConfig::default(),
-            providers: HashMap::new(),
-            safety: SafetyConfig::default(),
-            shell: ShellConfig::default(),
-        }
-    }
-}
 
 impl Default for ModelsConfig {
     fn default() -> Self {
