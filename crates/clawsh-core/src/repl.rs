@@ -8,14 +8,12 @@ macro_rules! ansi {
     };
 }
 
-fn bold(s: &str)    -> String { ansi!("1",     s) }
-fn cyan(s: &str)    -> String { ansi!("36",    s) }
-fn green(s: &str)   -> String { ansi!("32",    s) }
-fn magenta(s: &str) -> String { ansi!("35",    s) }
-fn blue(s: &str)    -> String { ansi!("34",    s) }
-fn yellow(s: &str)  -> String { ansi!("33",    s) }
-fn red(s: &str)     -> String { ansi!("31",    s) }
-fn dim(s: &str)     -> String { ansi!("2",     s) }
+fn bold(s: &str)    -> String { ansi!("1",  s) }
+fn cyan(s: &str)    -> String { ansi!("36", s) }
+fn green(s: &str)   -> String { ansi!("32", s) }
+fn magenta(s: &str) -> String { ansi!("35", s) }
+fn blue(s: &str)    -> String { ansi!("34", s) }
+fn dim(s: &str)     -> String { ansi!("2",  s) }
 
 pub struct Repl {
     model_name: String,
