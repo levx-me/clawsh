@@ -1,0 +1,34 @@
+[workspace]
+members = [
+    ".",
+    "crates/clawsh-core",
+    "crates/clawsh-classifier",
+    "crates/clawsh-llm",
+    "crates/clawsh-safety",
+    "crates/clawsh-config",
+]
+resolver = "2"
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+anyhow = "1"
+async-trait = "0.1"
+
+[package]
+name = "clawsh"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clawsh-core = { path = "crates/clawsh-core" }
+clawsh-classifier = { path = "crates/clawsh-classifier" }
+clawsh-llm = { path = "crates/clawsh-llm" }
+clawsh-safety = { path = "crates/clawsh-safety" }
+clawsh-config = { path = "crates/clawsh-config" }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+
+[[bin]]
+name = "clawsh"
+path = "src/main.rs"
