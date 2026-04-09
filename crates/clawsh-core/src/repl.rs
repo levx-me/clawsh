@@ -1,6 +1,22 @@
 use rustyline::DefaultEditor;
 use crate::executor::execute;
 
+// ANSI helpers — wrap in \x01..\x02 so rustyline counts display width correctly
+macro_rules! ansi {
+    ($code:expr, $text:expr) => {
+        format!("\x01\x1b[{}m\x02{}\x01\x1b[0m\x02", $code, $text)
+    };
+}
+
+fn bold(s: &str)    -> String { ansi!("1",     s) }
+fn cyan(s: &str)    -> String { ansi!("36",    s) }
+fn green(s: &str)   -> String { ansi!("32",    s) }
+fn magenta(s: &str) -> String { ansi!("35",    s) }
+fn blue(s: &str)    -> String { ansi!("34",    s) }
+fn yellow(s: &str)  -> String { ansi!("33",    s) }
+fn red(s: &str)     -> String { ansi!("31",    s) }
+fn dim(s: &str)     -> String { ansi!("2",     s) }
+
 pub struct Repl {
     model_name: String,
 }
@@ -26,7 +42,15 @@ impl Repl {
                 .unwrap_or_default()
                 .display()
                 .to_string();
-            let prompt = format!("clawsh [{}] {} > ", self.model_name, cwd);
+
+            // clawsh [model] ~/path ❯
+            let prompt = format!(
+                "{} {} {} {} ",
+                bold(&cyan("clawsh")),
+                dim(&magenta(&format!("[{}]", self.model_name))),
+                green(&cwd),
+                blue("❯"),
+            );
 
             let line = match rl.readline(&prompt) {
                 Ok(l) => l,
@@ -54,24 +78,24 @@ impl Repl {
             let cmd = match clawsh_classifier::classify(&input) {
                 clawsh_classifier::InputKind::Posix => input.clone(),
                 clawsh_classifier::InputKind::NaturalLanguage => {
-                    print!("  -> ");
                     use std::io::Write;
+                    print!("  \x1b[36m→\x1b[0m ");
                     std::io::stdout().flush()?;
                     let cmd = provider
                         .translate_to_command(&input, &cwd, &history)
                         .await?;
-                    println!("{cmd}");
+                    println!("\x1b[1m{cmd}\x1b[0m");
 
                     if config.safety.confirm_dangerous
                         && clawsh_safety::is_dangerous(&cmd)
                     {
-                        print!("  Warning: Dangerous command. Execute? [y/N] ");
+                        print!("  \x1b[31m⚠️  Dangerous command. Execute? [y/N]\x1b[0m ");
                         std::io::stdout().flush()?;
                         use std::io::BufRead;
                         let mut answer = String::new();
                         std::io::stdin().lock().read_line(&mut answer)?;
                         if !answer.trim().eq_ignore_ascii_case("y") {
-                            println!("  cancelled.");
+                            println!("  \x1b[2mcancelled.\x1b[0m");
                             continue;
                         }
                     }
@@ -90,11 +114,9 @@ impl Repl {
                 && config.safety.auto_explain_errors
                 && !result.stderr.is_empty()
             {
-                if !result.stderr.is_empty() {
-                    eprint!("{}", result.stderr);
-                }
+                eprint!("{}", result.stderr);
                 let explanation = provider.explain_error(&cmd, &result.stderr).await?;
-                println!("  Hint: {explanation}");
+                println!("  \x1b[33m💡 {explanation}\x1b[0m");
             } else if !result.stderr.is_empty() {
                 eprint!("{}", result.stderr);
             }
