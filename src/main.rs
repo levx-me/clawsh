@@ -1,5 +1,8 @@
 use clawsh_config::Config;
-use clawsh_core::{repl::Repl, setup::first_run_setup};
+use clawsh_core::{
+    repl::Repl,
+    setup::{config_path, ensure_ready, first_run_setup},
+};
 use clawsh_llm::ollama::OllamaProvider;
 use std::env;
 
@@ -9,6 +12,14 @@ async fn main() -> anyhow::Result<()> {
 
     if args.get(1).map(|s| s.as_str()) == Some("setup") {
         return first_run_setup().await;
+    }
+
+    // First run: config doesn't exist yet — auto-setup before starting REPL
+    if !config_path().exists() {
+        first_run_setup().await?;
+    } else {
+        // Config exists but Ollama might not be running — ensure it's ready
+        ensure_ready().await?;
     }
 
     let config = Config::load()?;
